@@ -1,6 +1,7 @@
 require("dotenv").config()
 const http = require("http")
 const AppDataSource = require("./db")
+const { json } = require("stream/consumers")
 
 function isUndefined (value) {
   return value === undefined
@@ -29,7 +30,7 @@ const requestListener = async (req, res) => {
   if (req.url === "/api/credit-package" && req.method === "GET") {
     try {
       //從 TypeORM 資料庫來源 AppDataSource 裡，取得 CreditPackage 資料表的 Repository
-      const packages = await AppDataSource.getRepository("CreditPackage").find({ 
+      const packages = await AppDataSource.getRepository("CreditPackage").find({
         //選取四個顯示的欄位(陣列)
         select: ["id", "name", "credit_amount", "price"]
       })
@@ -82,7 +83,7 @@ const requestListener = async (req, res) => {
         }
         //沒有重複 → 新增資料到資料庫
         // .create()：在記憶體生成一筆新的資料
-        const newPackage = await creditPackageRepo.create({ 
+        const newPackage = await creditPackageRepo.create({
           name: data.name,
           credit_amount: data.credit_amount,
           price: data.price
@@ -96,7 +97,6 @@ const requestListener = async (req, res) => {
         }))
         res.end()
       } catch (error) {
-        console.error(error)
         res.writeHead(500, headers)
         res.write(JSON.stringify({
           status: "error",
@@ -147,13 +147,13 @@ const requestListener = async (req, res) => {
     }
   } else if(req.url === "/api/coaches/skill" && req.method === "GET"){
     try {
-      const data = await AppDataSource.getRepository('Skill').find({
+      const skill = await AppDataSource.getRepository("Skill").find({
         select:["id", "name"]
       })
       res.writeHead(200, headers)
       res.write(JSON.stringify({ //把資料轉成 JSON 格式
         status: "success",
-        data: data
+        data: skill
       }))
       res.end() //用 res.end() 結束回應
     } catch (error) {
@@ -164,10 +164,85 @@ const requestListener = async (req, res) => {
       }))
       res.end()
     }
-
-
   } else if(req.url === "/api/coaches/skill" && req.method === "POST"){
-  } else if(req.url === "/api/coaches/skill/" && req.method === "DELETE"){
+    req.on("end", async () =>{
+      try {
+        const skillData = JSON.parse(body)
+        if(isNotValidSting(skillData.name)){
+          res.writeHead(400, headers)
+          res.write(JSON.stringify({
+            status: "failed",
+            message: "欄位未填寫正確"
+          }))
+          res.end()
+          return
+        }
+        const skillRepo = await AppDataSource.getRepository("Skill")
+        const skillPackage = await skillRepo.find({
+          where:{
+            name: skillData.name
+          }
+        })
+        if(skillPackage.length > 0){
+          res.writeHead(409, headers)
+          res.write(JSON.stringify({
+            status: "failed",
+            message: "資料重複"
+          }))
+          res.end()
+          return
+        }
+        const newSkill = await skillRepo.create({
+          name:skillData.name
+        })
+        const skillResult = await skillRepo.save(newSkill)
+        res.writeHead(200, headers)
+        res.write(JSON.stringify({
+          status: "success",
+          data: skillResult
+        }))
+        res.end()
+      } catch (error) {
+        res.writeHead(500, headers)
+        res.write(JSON.stringify({
+          status: "error",
+          message: "伺服器錯誤"
+        }))
+        res.end()
+      }
+    })
+
+  } else if(req.url.startsWith("/api/coaches/skill/") && req.method === "DELETE"){
+    try {
+      const skillId = req.url.split("/").pop()
+      if(isUndefined(skillId) || isNotValidSting(skillId)){
+        res.writeHead(400, headers)
+        res.write(JSON.stringify({
+          status: "failed",
+          message: "ID錯誤"
+        }))
+        res.end()
+        return
+      }
+      const result = await AppDataSource.getRepository("Skill").delete(skillId)
+      if(result.affected === 0){
+        res.writeHead(400, headers)
+        res.write(JSON.stringify({
+          status: "failed",
+          message: "ID錯誤"
+        }))
+        res.end()
+        return
+      }
+    } catch (error) {
+      console.error(error)
+      res.writeHead(500, headers)
+      res.write(JSON.stringify({
+        status: "error",
+        message: "伺服器錯誤"
+      }))
+      res.end()
+    }
 
   } else if (req.method === "OPTIONS") {
     res.writeHead(200, headers)
