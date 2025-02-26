@@ -4,13 +4,14 @@ const router = express.Router()
 const { dataSource } = require('../db/data-source')
 const Coach = require('../entities/Coach')
 
+
 const logger = require('../utils/logger')('Coach')
 
 function isUndefined (value) {
     return value === undefined
 }
 
-function isNotValidSting (value) {
+function isNotValidSrting (value) {
     return typeof value !== 'string' || value.trim().length === 0 || value === ''
 }
 
@@ -21,22 +22,44 @@ function isNotValidInteger (value) {
 router.get('/', async (req, res, next) => {
     try {
         const {per,page}= req.query
-        if(isNotValidSting(per)||isNotValidSting(page)){
+        if(isNotValidSrting(per)||isNotValidSrting(page)){
             res.status(400).json({
                 status: 'failed',
                 message: '欄位未填寫正確'
                 })
                 return
         }
-        const coaches = await dataSource.getRepository('User').find({
-        select: ['id','name'],
-        where : {role : 'COACH'},
+        const perNum = parseInt(per)
+        const pageNum = parseInt(page)
+        if(isNotValidInteger(perNum) || isNotValidInteger(pageNum)|| perNum <= 0 || pageNum <= 0){
+            return res.status(400).json({
+                status: 'failed',
+                message: 'per 和 page 須是正整數'
+            })
+        }
+        const coaches = await dataSource.getRepository('Coach').find({
+            select: { 
+                id: true,
+                user: {
+                    id: true,
+                    name: true
+                }
+            },
+            relations: { 
+                user: true
+            },
+            skip: (pageNum - 1) * perNum,
+            take: perNum
+        });
+        const result = coaches.map(coach => ({
+            id: coach.id,
+            name: coach.user.name
+        }));
 
-        })
         res.status(200).json({
             status: 'success',
-            data: coaches
-        })
+            data: result
+        });
     } catch (error) {
         logger.error(error)
         next(error)

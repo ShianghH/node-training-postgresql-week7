@@ -39,7 +39,7 @@ module.exports = new EntitySchema({
     }
   },
   relations: {
-    User: {
+    user: {
       target: 'User',
       type: 'one-to-one',
       inverseSide: 'Coach',
