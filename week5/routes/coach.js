@@ -12,7 +12,7 @@ function isUndefined (value) {
     return value === undefined
 }
 
-function isNotValidSrting (value) {
+function isNotValidString (value) {
     return typeof value !== 'string' || value.trim().length === 0 || value === ''
 }
 
@@ -23,7 +23,7 @@ function isNotValidInteger (value) {
 router.get('/', async (req, res, next) => {
     try {
         const {per,page}= req.query
-        if(isNotValidSrting(per)||isNotValidSrting(page)){
+        if(isNotValidString(per)||isNotValidString(page)){
             res.status(400).json({
                 status: 'failed',
                 message: '欄位未填寫正確'
@@ -72,7 +72,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:coachId', async (req, res, next) => {
     try {
         const coachId = req.params.coachId;
-        if(isUndefined(coachId)||isNotValidSrting(coachId)){
+        if(isUndefined(coachId)||isNotValidString(coachId)){
             res.status(400).json({
                 status: 'failed',
                 message: '欄位未填寫正確'

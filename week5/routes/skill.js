@@ -1,4 +1,3 @@
-// skill.js routes
 const express = require('express')
 
 const router = express.Router()
@@ -10,7 +9,7 @@ function isUndefined (value) {
     return value === undefined
 }
 
-function isNotValidSting (value) {
+function isNotValidSrting (value) {
     return typeof value !== 'string' || value.trim().length === 0 || value === ''
 }
 
@@ -32,7 +31,7 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
     try {
     const { name } = req.body
-    if (isUndefined(name) || isNotValidSting(name)) {
+    if (isUndefined(name) || isNotValidSrting(name)) {
         res.status(400).json({
         status: 'failed',
         message: '欄位未填寫正確'
@@ -69,7 +68,7 @@ router.post('/', async (req, res, next) => {
 router.delete('/:skillId', async (req, res, next) => {
     try {
     const skillId = req.url.split('/').pop()
-    if (isUndefined(skillId) || isNotValidSting(skillId)) {
+    if (isUndefined(skillId) || isNotValidSrting(skillId)) {
         res.status(400).json({
             status: 'failed',
             message: 'ID錯誤'

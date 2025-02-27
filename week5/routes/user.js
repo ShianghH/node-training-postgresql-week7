@@ -11,7 +11,7 @@ function isUndefined (value) {
   return value === undefined
 }
 
-function isNotValidSting (value) {
+function isNotValidSrting (value) {
   return typeof value !== 'string' || value.trim().length === 0 || value === ''
 }
 
@@ -21,7 +21,7 @@ router.post('/signup', async (req, res, next) => {
     const passwordPattern = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}/
     const { name, email, password } = req.body
     // 驗證必填欄位
-    if (isUndefined(name) || isNotValidSting(name) || isUndefined(email) || isNotValidSting(email) || isUndefined(password) || isNotValidSting(password)) {
+    if (isUndefined(name) || isNotValidSrting(name) || isUndefined(email) || isNotValidSrting(email) || isUndefined(password) || isNotValidSrting(password)) {
       logger.warn('欄位未填寫正確')
       res.status(400).json({
         status: 'failed',
