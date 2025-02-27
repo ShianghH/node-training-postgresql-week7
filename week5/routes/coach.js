@@ -126,9 +126,8 @@ router.get('/:coachId', async (req, res, next) => {
         
 
     } catch (error) {
-        res.send("123")
-        // logger.error(error)
-        // next(error)
+        logger.error(error)
+        next(error)
     }
 })
 
