@@ -3,6 +3,7 @@ const express = require('express')
 const router = express.Router()
 const { dataSource } = require('../db/data-source')
 const Coach = require('../entities/Coach')
+const e = require('express')
 
 
 const logger = require('../utils/logger')('Coach')
@@ -68,5 +69,67 @@ router.get('/', async (req, res, next) => {
     
 })
 
+router.get('/:coachId', async (req, res, next) => {
+    try {
+        const coachId = req.params.coachId;
+        if(isUndefined(coachId)||isNotValidSrting(coachId)){
+            res.status(400).json({
+                status: 'failed',
+                message: '欄位未填寫正確'
+            })
+            return
+        }
+        const result = await dataSource.getRepository('Coach').findOne({
+            where :{ id : coachId},
+            relations :{user:true},
+            select:{
+                user: {
+                    name: true,
+                    role: true
+                },
+                id: true,
+                user_id: true,
+                experience_years: true,
+                description: true,
+                profile_image_url: true,
+                created_at: true,
+                updated_at: true,
+
+            }
+        })
+
+        if(!result){
+            res.status(400).json({
+                status: 'failed',
+                message: '找不到該教練'
+            })
+            return
+        }
+        //**解構 result**，讓回應更簡潔
+        const { id, user_id, experience_years, description, profile_image_url, created_at, updated_at, user } = result;
+        res.status(200).json({
+            status: 'success',
+            data: {
+                user,
+                coach:{
+                    id,
+                    user_id,
+                    experience_years,
+                    description,
+                    profile_image_url,
+                    created_at,
+                    updated_at,
+                }
+                
+            }
+        })
+        
+
+    } catch (error) {
+        res.send("123")
+        // logger.error(error)
+        // next(error)
+    }
+})
 
 module.exports = router
