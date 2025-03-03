@@ -30,31 +30,32 @@ router.get('/', async (req, res, next) => {
                 })
                 return
         }
-        const perNum = parseInt(per)
-        const pageNum = parseInt(page)
-        if(isNotValidInteger(perNum) || isNotValidInteger(pageNum)|| perNum <= 0 || pageNum <= 0){
-            return res.status(400).json({
-                status: 'failed',
-                message: 'per 和 page 須是正整數'
-            })
-        }
+        const perNum = parseInt(per);
+        const pageNum = parseInt(page);
+
+    if (isNotValidInteger(perNum) || isNotValidInteger(pageNum) || perNum <= 0 || pageNum <= 0) {
+        return res.status(400).json({
+        status: 'failed',
+        message: 'per 和 page 須是正整數'
+    });
+}
         const coaches = await dataSource.getRepository('Coach').find({
             select: { 
                 id: true,
-                user: {
+                User: {
                     id: true,
                     name: true
                 }
             },
             relations: { 
-                user: true
+                User: true
             },
             skip: (pageNum - 1) * perNum,
             take: perNum
         });
         const result = coaches.map(coach => ({
             id: coach.id,
-            name: coach.user.name
+            name: coach.User.name
         }));
 
         res.status(200).json({
@@ -81,9 +82,11 @@ router.get('/:coachId', async (req, res, next) => {
         }
         const result = await dataSource.getRepository('Coach').findOne({
             where :{ id : coachId},
-            relations :{user:true},
+            relations :{
+                User: true
+            },
             select:{
-                user: {
+                User: {
                     name: true,
                     role: true
                 },
@@ -106,11 +109,12 @@ router.get('/:coachId', async (req, res, next) => {
             return
         }
         //**解構 result**，讓回應更簡潔
-        const { id, user_id, experience_years, description, profile_image_url, created_at, updated_at, user } = result;
+        
+        const { id, user_id, experience_years, description, profile_image_url, created_at, updated_at, User } = result;
         res.status(200).json({
             status: 'success',
             data: {
-                user,
+                User,
                 coach:{
                     id,
                     user_id,
