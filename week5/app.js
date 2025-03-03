@@ -9,6 +9,7 @@ const skillRouter = require('./routes/skill')
 const userRouter = require('./routes/user')
 const adminRouter = require('./routes/admin')
 const coachRouter = require('./routes/coach')
+const courseRouter = require('./routes/course')
 
 
 
@@ -37,6 +38,7 @@ app.use('/api/coaches/skill', skillRouter)
 app.use('/api/users', userRouter)
 app.use('/api/admin', adminRouter)
 app.use('/api/coaches', coachRouter)
+app.use('/api/course', courseRouter)
 
 
 
