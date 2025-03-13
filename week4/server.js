@@ -21,12 +21,17 @@ const requestListener = async (req, res) => {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "PATCH, POST, GET,OPTIONS,DELETE",
     "Content-Type": "application/json"
-  }
+}
   let body = ""
   req.on("data", (chunk) => {
     body += chunk
   })
 
+const sendResponse = (res, statusCode, data) =>{
+    res.writeHead(statusCode, headers);
+    res.write(JSON.stringify(data));//把資料轉成 JSON 格式
+    res.end();//用 res.end() 結束回應
+}
   if (req.url === "/api/credit-package" && req.method === "GET") {
     try {
       //從 TypeORM 資料庫來源 AppDataSource 裡，取得 CreditPackage 資料表的 Repository
@@ -35,19 +40,15 @@ const requestListener = async (req, res) => {
         select: ["id", "name", "credit_amount", "price"]
       })
       //查詢成功 → 回傳資料給前端
-      res.writeHead(200, headers)
-      res.write(JSON.stringify({ //把資料轉成 JSON 格式
+      sendResponse(res,200,{
         status: "success",
         data: packages
-      }))
-      res.end() //用 res.end() 結束回應
+      });
     } catch (error) {
-      res.writeHead(500, headers)
-      res.write(JSON.stringify({
+      sendResponse(res,500,{
         status: "error",
         message: "伺服器錯誤"
-      }))
-      res.end()
+      });
     }
   } else if (req.url === "/api/credit-package" && req.method === "POST") {
     req.on("end", async () => { //等待客戶端把資料傳送完，然後才開始處理
@@ -57,12 +58,10 @@ const requestListener = async (req, res) => {
         if (isUndefined(data.name) || isNotValidSting(data.name) ||
                 isUndefined(data.credit_amount) || isNotValidInteger(data.credit_amount) ||
                 isUndefined(data.price) || isNotValidInteger(data.price)) {
-          res.writeHead(400, headers)
-          res.write(JSON.stringify({
-            status: "failed",
-            message: "欄位未填寫正確"
-          }))
-          res.end()
+          sendResponse(res,400,{
+              status: "failed",
+              message: "欄位未填寫正確"
+          });
           return
         }
         const creditPackageRepo = await AppDataSource.getRepository("CreditPackage")
@@ -73,12 +72,10 @@ const requestListener = async (req, res) => {
           }
         })
         if (existPackage.length > 0) {
-          res.writeHead(409, headers)
-          res.write(JSON.stringify({
-            status: "failed",
-            message: "資料重複"
-          }))
-          res.end()
+          sendResponse(res,400,{
+              status: "failed",
+              message: "資料重複"
+          });
           return
         }
         //沒有重複 → 新增資料到資料庫
@@ -90,19 +87,15 @@ const requestListener = async (req, res) => {
         })
         //.save()：把這筆資料寫進資料庫
         const result = await creditPackageRepo.save(newPackage)
-        res.writeHead(200, headers)
-        res.write(JSON.stringify({
+        sendResponse(res,201,{
           status: "success",
           data: result
-        }))
-        res.end()
+        });
       } catch (error) {
-        res.writeHead(500, headers)
-        res.write(JSON.stringify({
-          status: "error",
-          message: "伺服器錯誤"
-        }))
-        res.end()
+        sendResponse(res,500,{
+            status: "error",
+            message: "伺服器錯誤"
+        });
       }
     })
   } else if (req.url.startsWith("/api/credit-package/") && req.method === "DELETE") {
@@ -110,71 +103,56 @@ const requestListener = async (req, res) => {
       // 取得 URL 裡的 ID
       const packageId = req.url.split("/").pop()
       //檢查 ID 是否有效
-      if (isUndefined(packageId) || isNotValidSting(packageId)) {
-        res.writeHead(400, headers)
-        res.write(JSON.stringify({
+      if (  isNotValidSting(packageId)) {
+        sendResponse(res,400,{
           status: "failed",
           message: "ID錯誤"
-        }))
-        res.end()
+        });
         return
       }
       //用 TypeORM 的 delete() 方法，根據 packageId 刪除資料
       const result = await AppDataSource.getRepository("CreditPackage").delete(packageId)
       //result.affected 表示刪除的筆數
       if (result.affected === 0) {
-        res.writeHead(400, headers)
-        res.write(JSON.stringify({
+        sendResponse(res,400,{
           status: "failed",
           message: "ID錯誤"
-        }))
-        res.end()
+        });
         return
       }
-      res.writeHead(200, headers)
-      res.write(JSON.stringify({
-        status: "success"
-      }))
-      res.end()
+      sendResponse(res,200,{
+          status: "success"
+      });
     } catch (error) {
-      console.error(error)
-      res.writeHead(500, headers)
-      res.write(JSON.stringify({
+      sendResponse(res,500,{
         status: "error",
         message: "伺服器錯誤"
-      }))
-      res.end()
+      });
     }
   } else if(req.url === "/api/coaches/skill" && req.method === "GET"){
     try {
       const skill = await AppDataSource.getRepository("Skill").find({
         select:["id", "name"]
       })
-      res.writeHead(200, headers)
-      res.write(JSON.stringify({ //把資料轉成 JSON 格式
+      sendResponse(res,200,{
         status: "success",
         data: skill
-      }))
-      res.end() //用 res.end() 結束回應
+      });
     } catch (error) {
-      res.writeHead(500, headers)
-      res.write(JSON.stringify({
+      sendResponse(res,500,{
         status: "error",
-        message: "伺服器錯誤"
-      }))
-      res.end()
+        message: "伺服器錯誤"        
+      });
     }
   } else if(req.url === "/api/coaches/skill" && req.method === "POST"){
     req.on("end", async () =>{
       try {
         const skillData = JSON.parse(body)
         if(isNotValidSting(skillData.name)){
-          res.writeHead(400, headers)
-          res.write(JSON.stringify({
+          sendResponse(res,400,{
             status: "failed",
             message: "欄位未填寫正確"
-          }))
-          res.end()
+          });
           return
         }
         const skillRepo = await AppDataSource.getRepository("Skill")
@@ -184,31 +162,25 @@ const requestListener = async (req, res) => {
           }
         })
         if(skillPackage.length > 0){
-          res.writeHead(409, headers)
-          res.write(JSON.stringify({
+          sendResponse(res,409,{
             status: "failed",
-            message: "資料重複"
-          }))
-          res.end()
+            message: "資料重複"            
+          });
           return
         }
         const newSkill = await skillRepo.create({
           name:skillData.name
         })
         const skillResult = await skillRepo.save(newSkill)
-        res.writeHead(200, headers)
-        res.write(JSON.stringify({
+        sendResponse(res,201,{
           status: "success",
-          data: skillResult
-        }))
-        res.end()
+          data: skillResult          
+        });
       } catch (error) {
-        res.writeHead(500, headers)
-        res.write(JSON.stringify({
+        sendResponse(res,500,{
           status: "error",
-          message: "伺服器錯誤"
-        }))
-        res.end()
+          message: "伺服器錯誤"          
+        });
       }
     })
 
@@ -216,44 +188,37 @@ const requestListener = async (req, res) => {
     try {
       const skillId = req.url.split("/").pop()
       if(isUndefined(skillId) || isNotValidSting(skillId)){
-        res.writeHead(400, headers)
-        res.write(JSON.stringify({
+        sendResponse(res,400,{
           status: "failed",
-          message: "ID錯誤"
-        }))
-        res.end()
+          message: "ID錯誤"          
+        });
         return
       }
       const result = await AppDataSource.getRepository("Skill").delete(skillId)
       if(result.affected === 0){
-        res.writeHead(400, headers)
-        res.write(JSON.stringify({
+        sendResponse(res,400,{
           status: "failed",
-          message: "ID錯誤"
-        }))
-        res.end()
+          message: "ID錯誤"          
+        });
         return
       }
     } catch (error) {
-      console.error(error)
-      res.writeHead(500, headers)
-      res.write(JSON.stringify({
+      sendResponse(res,500,{
         status: "error",
-        message: "伺服器錯誤"
-      }))
-      res.end()
+        message: "伺服器錯誤"        
+      });
     }
 
   } else if (req.method === "OPTIONS") {
-    res.writeHead(200, headers)
-    res.end()
+    sendResponse(res,200,{
+      
+    });
+
   } else {
-    res.writeHead(404, headers)
-    res.write(JSON.stringify({
+    sendResponse(res,404,{
       status: "failed",
-      message: "無此網站路由"
-    }))
-    res.end()
+      message: "無此網站路由"      
+    });
   }
 }
 
