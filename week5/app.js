@@ -33,10 +33,10 @@ app.get('/healthcheck', (req, res) => {
 })
 app.use('/api/credit-package', creditPackageRouter)
 app.use('/api/coaches/skill', skillRouter)
-app.use('/api/users', userRouter)
-app.use('/api/admin', adminRouter)
 app.use('/api/coaches', coachRouter)
-app.use('/api/course', courseRouter)
+app.use('/api/admin', adminRouter)
+app.use('/api/users', userRouter)
+app.use('/api/courses', courseRouter)
 app.use('/api/upload', uploadRouter)
 
 // eslint-disable-next-line no-unused-vars

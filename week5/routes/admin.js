@@ -21,13 +21,24 @@ const {
   putCoachProfile
 } =require('../controllers/admin')
 
-router.post('/coaches/:userId', postUserId)
+//新增教練課程資料
 router.post('/coaches/courses', auth, isCoach, postCourse)
-router.get('/coaches/courses',auth, isCoach,getCoachCourses)
-router.get('/coaches/courses/:courseId',auth,getCoachCourseDetail)
-router.get('/coaches',auth, isCoach, getCoachProfile)
+// 取得教練自己的月營收資料
 router.get('/coaches/revenue',auth, isCoach, getCoachRevenue)
+// 取得教練自己的課程列表
+router.get('/coaches/courses',auth, isCoach,getCoachCourses)
+// 取得教練自己的課程詳細資料
+router.get('/coaches/courses/:courseId',auth,getCoachCourseDetail)
+// 編輯教練課程資料
 router.put('/coaches/courses/:courseId', auth, isCoach, putCourse)
+//將使用者新增為教練
+router.post('/coaches/:userId', postUserId)
+//變更教練資料
 router.put('/coaches', auth, isCoach, putCoachProfile)
+//取得教練自己的詳細資料
+router.get('/coaches',auth, isCoach, getCoachProfile)
+
+
+
 
 module.exports = router

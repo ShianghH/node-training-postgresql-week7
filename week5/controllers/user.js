@@ -2,7 +2,9 @@ const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('Users')
 const generateJWT = require('../utils/generateJWT') //引入 generateJWT，用於產生 JWT Token
 const bcrypt = require('bcrypt')
+const { IsNull, In } = require('typeorm')
 const config = require('../config/index')
+const passwordPattern = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}/
 
 function isUndefined (value) {
     return value === undefined

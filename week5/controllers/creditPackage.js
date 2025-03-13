@@ -5,7 +5,7 @@ function isUndefined (value) {
     return value === undefined
 }
 
-function isNotValidSting (value) {
+function isNotValidString (value) {
     return typeof value !== 'string' || value.trim().length === 0 || value === ''
 }
 
@@ -30,7 +30,7 @@ const getCreditPackage = async (req, res, next) => {
 const postCreditPackage = async (req, res, next) => {
     try {
         const { name, credit_amount: creditAmount, price } = req.body
-        if (isUndefined(name) || isNotValidSting(name) ||
+        if (isUndefined(name) || isNotValidString(name) ||
             isUndefined(creditAmount) || isNotValidInteger(creditAmount) ||
             isUndefined(price) || isNotValidInteger(price)) {
           res.status(400).json({
@@ -105,7 +105,7 @@ const postCreditPackageId = async (req, res, next) => {
 const deCreditPackageId = async (req, res, next) => {
   try {
     const { creditPackageId } = req.params
-    if (isUndefined(creditPackageId) || isNotValidSting(creditPackageId)) {
+    if (isUndefined(creditPackageId) || isNotValidString(creditPackageId)) {
       res.status(400).json({
         status: 'failed',
         message: '欄位未填寫正確'
