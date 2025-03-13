@@ -5,14 +5,10 @@ const bcrypt = require('bcrypt')
 const { IsNull, In } = require('typeorm')
 const config = require('../config/index')
 const passwordPattern = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}/
-
-function isUndefined (value) {
-    return value === undefined
-}
-
-function isNotValidString (value) {
-    return typeof value !== 'string' || value.trim().length === 0 || value === ''
-}
+const {
+  isUndefined,
+  isNotValidString,
+  isNotValidInteger} =require('../utils/validators')
 
 
 const postSignup =  async (req, res, next) => {

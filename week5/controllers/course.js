@@ -1,7 +1,10 @@
 const { IsNull } = require('typeorm')
 const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('Course')
-
+const {
+  isUndefined,
+  isNotValidString,
+  isNotValidInteger} =require('../utils/validators')
 
 
 const getCourse = async (req, res, next) => {

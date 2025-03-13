@@ -1,13 +1,9 @@
 const { dataSource } = require('../db/data-source')
 const logger = require('../utils/logger')('Skill')
-
-function isUndefined (value) {
-    return value === undefined
-}
-
-function isNotValidString (value) {
-    return typeof value !== 'string' || value.trim().length === 0 || value === ''
-}
+const {
+    isUndefined,
+    isNotValidString,
+    isNotValidInteger} =require('../utils/validators')
 
 const getSkill = async (req, res, next) => {
     try {
